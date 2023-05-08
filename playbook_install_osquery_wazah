@@ -34,6 +34,7 @@
                   "config_plugin": "filesystem",
                   "logger_plugin": "filesystem",
                   "utc": "true"
+                  "force": "true"
               },
 
               "schedule": {
@@ -73,7 +74,7 @@
         enabled: yes
         state: started
 
-    - name: Restart service OSQuery
+    - name: Restart service Wazuh Agent
       ansible.builtin.systemd:
         name: wazuh-agent
         state: restarted
