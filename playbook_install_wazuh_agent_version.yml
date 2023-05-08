@@ -1,0 +1,37 @@
+- name: Install Wazuh Agent on Hosts
+  hosts: all
+  become: yes
+  become_user: root
+  become_method: sudo
+  vars_files:
+  #Add path to ansible-vault file
+   - /home/{username}/ansible_sudo_password.txt
+  vars:
+   ansible_become_pass: '{{ ansible_sudo_password }}'
+
+
+  tasks:
+    - name: Download wazuh package
+      ansible.builtin.get_url:
+       url: https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.2.5-1_amd64.deb
+       dest: /tmp/wazuh-agent_4.2.5-1_amd64.deb
+
+    - name: Install Wazuh-Agent
+      shell: "WAZUH_MANAGER='{Wazuh Server IP or FQDN}' WAZUH_AGENT_GROUP='default' dpkg -i /tmp/wazuh-agent_4.2.5-1_amd64.deb"
+
+    - name: SED wazuh manager file
+      shell: "sed -i 's/MANAGER_IP/{Wazuh Server IP or FQDN}/g' /var/ossec/etc/ossec.conf"
+
+    - name: Just force systemd
+      ansible.builtin.systemd:
+       daemon_reload: true
+
+    - name: Enable service wazuh
+      ansible.builtin.systemd:
+       name: wazuh-agent
+       enabled: true
+
+    - name: Make sure a service unit is running
+      ansible.builtin.systemd:
+       state: started
+       name: wazuh-agent
