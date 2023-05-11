@@ -1,0 +1,39 @@
+- name: Install Zabbix Agent on Hosts
+  hosts: all
+  become: yes
+  become_user: root
+  become_method: sudo
+  vars_files:
+   - /home/{username}e/ansible_sudo_password.txt
+  vars:
+   ansible_become_pass: '{{ ansible_sudo_password }}'
+
+
+  tasks:
+    - name: Install zabbix-agent
+      ansible.builtin.apt:
+        name: zabbix-agent
+        update_cache: yes
+
+    - name: SED Zabbix config file with Server IP info
+      shell:  sudo sed -i 's/Server=127.0.0.1/Server={zabbix-server-ip-address}/g' /etc/zabbix/zabbix_agentd.conf
+
+    - name: SED Zabbix config file with ServerActive IP info
+      shell:  sudo sed -i 's/ServerActive=127.0.0.1/ServerActive={zabbix-server-ip-address}/g' /etc/zabbix/zabbix_agentd.conf
+
+    - name: SED Zabbix config file with Hostname Identifier
+      shell:  sudo sed -i 's/# HostnameItem=system.hostname/HostnameItem=system.hostname/g' /etc/zabbix/zabbix_agentd.conf
+
+    - name: SED Zabbix config file with Metadata
+      shell:  sudo sed -i 's/# HostMetadata=/HostMetadata=linux/g' /etc/zabbix/zabbix_agentd.conf
+
+
+    - name: Enable service Zabbix Agent
+      ansible.builtin.systemd:
+       name: zabbix-agent
+       enabled: true
+
+    - name: Make sure a service unit is running
+      ansible.builtin.systemd:
+       state: restarted
+       name: zabbix-agent
