@@ -33,7 +33,7 @@
               "options": {
                   "config_plugin": "filesystem",
                   "logger_plugin": "filesystem",
-                  "utc": "true"
+                  "utc": "true",
                   "force": "true"
               },
 
@@ -76,5 +76,5 @@
 
     - name: Restart service Wazuh Agent
       ansible.builtin.systemd:
-        name: wazuh-agent
+        name: osqueryd
         state: restarted
